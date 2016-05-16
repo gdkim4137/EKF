@@ -38,7 +38,7 @@ public:
 
 
 public:
-    void device_setup(void);
+    bool device_setup(void);
 
 public:
  //   void callback_yr9010(Transponder& tr);

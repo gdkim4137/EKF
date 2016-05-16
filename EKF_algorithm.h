@@ -118,7 +118,9 @@ public:
         //  to consider twist-angle between global coordinates and earth coordinates
         QGenericMatrix<2,2,double> rot_mat = cacl_rot_mat(twistAngle);
 
+
         //  observed location from detected transponder
+        QGenericMatrix<2,1,double> observed;
         observed(0,0) = rot_mat(0,0)*location[0] + rot_mat(0,1)*location[1];
         observed(1,0) = rot_mat(1,0)*location[0] + rot_mat(1,1)*location[1];
 

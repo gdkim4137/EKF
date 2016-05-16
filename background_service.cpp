@@ -35,7 +35,7 @@ bool Background_Service::device_setup()
     this->msleep(1000);
 
     //  Encoder
-    if(encoder.start("/dev/ttySAC0",115200)==false)
+    if(encoder.start("/dev/ttyAMA0",115200)==false)
     {
         std::cout << "Can not access the encoder"<<std::endl;
         emit signal_LogMsgOccured("Can not access the encoder");
@@ -81,9 +81,13 @@ void Background_Service::run()
 
         if( encoder.bReceived == true)
         {
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //              should be changed
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
             //  EKF prediction step
             if(kalman.firstTime)    break;
-            else                    kalman.predict();
+     //       else                    kalman.predict();
 
             emit signal_AngularVelocityReceived(encoder.info);
             encoder.bReceived = false;
@@ -95,11 +99,12 @@ void Background_Service::run()
             //  receive heading angle
             sensor.get_data(sensor_data);
             WithRobot::EulerAngle& e = sensor_data.euler_angle;
-            sensor_count = sensor.get_sample_count();
+            //sensor_count = sensor.get_sample_count();
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //              imu value need to change range of value from [-180, 180] to [0, 360]
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /*
             if(e.yaw<180 && e.yaw > -180)
             {
                 //  initial angle
@@ -110,6 +115,7 @@ void Background_Service::run()
             {
                 emit signal_HeadingAngleReceived(e.yaw);
             }
+            */
         }
         if(yr.bRecognized)
         {
