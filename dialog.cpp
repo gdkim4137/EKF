@@ -38,11 +38,13 @@ void Dialog::slot_AngularVelocityReceived(AngularVelocity av)
 void Dialog::slot_HeadingAngleReceived(double val)
 {
     //  heading angle update and display
-    ui->printLog->appendPlainText("Heading angle : "+QString::number(val));
+    ui->heading_angle->setText(QString::number(val));
+    //ui->printLog->appendPlainText("Heading angle : "+QString::number(val));
 }
 
 void Dialog::slot_LogMsgOccured(QString str)
 {
+
     ui->printLog->appendPlainText(str);
 }
 

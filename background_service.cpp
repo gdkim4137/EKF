@@ -35,12 +35,12 @@ bool Background_Service::device_setup()
     this->msleep(1000);
 
     //  Encoder
-    if(encoder.start("/dev/ttyAMA0",115200)==false)
-    {
-        std::cout << "Can not access the encoder"<<std::endl;
-        emit signal_LogMsgOccured("Can not access the encoder");
-        return false;
-    }
+//    if(encoder.start("/dev/ttyAMA0",115200)==false)
+ //   {
+  //      std::cout << "Can not access the encoder"<<std::endl;
+   //     emit signal_LogMsgOccured("Can not access the encoder");
+    //    return false;
+  //  }
 
     return true;
 
@@ -63,8 +63,8 @@ void Background_Service::run()
 
         /*
         //  send pose to vehicle
-        this->msleep(10);
-        if( encoder.bReceived == false)
+
+        if( encoder.bReceived == true)
         {
             char command[] = { 0x55, 0x55,
                                0x00,0x00,0x00,0x00, //  key pose
@@ -79,15 +79,17 @@ void Background_Service::run()
         }
         */
 
+
         if( encoder.bReceived == true)
         {
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //              should be changed
+            //              should be changed because don't consider encoder decoded
+            //              and
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             //  EKF prediction step
-            if(kalman.firstTime)    break;
-     //       else                    kalman.predict();
+     //     if(kalman.firstTime)    break;
+     //     else                    kalman.predict();
 
             emit signal_AngularVelocityReceived(encoder.info);
             encoder.bReceived = false;
@@ -104,31 +106,34 @@ void Background_Service::run()
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             //              imu value need to change range of value from [-180, 180] to [0, 360]
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            /*
-            if(e.yaw<180 && e.yaw > -180)
-            {
-                //  initial angle
-                sensor_count++;
-                emit signal_HeadingAngleReceived(e.yaw);
-            }
-            else
+
+            std::cout << e.yaw << std::endl;
+            if (e.yaw > 0 )
             {
                 emit signal_HeadingAngleReceived(e.yaw);
             }
-            */
+            else if (e.yaw < 0)
+            {
+                emit signal_HeadingAngleReceived(360.0-std::abs(e.yaw));
+            }
         }
         if(yr.bRecognized)
         {
             //  EKF update step
-            kalman.update(yr.info.x,yr.info.y);
+//            kalman.update(yr.info.x,yr.info.y);
 
             yr.bRecognized = false;
             emit signal_UHFTransponderRecognized(QString::number(yr.info.x),QString::number(yr.info.y));
         }
+
     }
 }
 
+void Background_Service::sub_loop()
+{
 
+
+}
 
 
 

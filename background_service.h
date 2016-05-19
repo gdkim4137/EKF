@@ -30,6 +30,8 @@ public:
     void run();
     bool mStop;
 
+    void sub_loop();
+
 public:
     YR9010 yr;
     WithRobot::MyAhrsPlus sensor;
