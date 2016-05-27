@@ -72,36 +72,45 @@ void Background_Service::run()
         if( encoder.bReceived == true)
         {
 
-            //  send pose to vehicle
-            char command[] = { 0x55, 0x55,
-                               0x51,0x51,0x51,0x51, //  key pose
-                               0x51,0x51,0x51,0x51, //  x location
-                               0x52,0x52,0x52,0x52, //  y location
-                               0x53,0x53,0x53,0x53, //  w (heading angle)
-                               0xAA, 0xAA};
 
+            // EKF prediction step run
+            kalman.predict(encoder.prev,encoder.curr,90);
+            //  send pose to vehicle
+
+            int x,y;
+            kalman.get_location(x,y);
+
+            std::cout << "x : " << (double)(x/10) << "y : " << (double)(y/10) <<std::endl;
+
+            /*
+            char command[] = { 0x55, 0x55,
+                               0x51,0x51,0x51,0x51, //  key pose Q
+                               0x51,0x51,0x51,0x51, //  x location Q
+                               0x52,0x52,0x52,0x52, //  y location R
+                               0x53,0x53,0x53,0x53, //  w (heading angle) S
+                               0x5A, 0x5A};
 
             for (int i = 0 ; i < sizeof(command) ; ++i)
                 command_string += command[i];
 
             encoder.send_pose(command_string);
             command_string.clear();
+            */
 
+            encoder.send_pose(0,x,y,286);
+            //  testing
+        //    encoder.send_pose(0,100,100,0);
 
-
-         //   std::cout << curr.left_top <<" "<< curr.right_top <<" "<< curr.left_bottom <<" "<< curr.right_bottom << std::endl;
+        //   std::cout << curr.left_top <<" "<< curr.right_top <<" "<< curr.left_bottom <<" "<< curr.right_bottom << std::endl;
 
             emit signal_AngularVelocityReceived(encoder.curr.left_top,encoder.curr.right_top,
                                                 encoder.curr.left_bottom,encoder.curr.right_bottom);
-//
-            // EKF prediction step run
 
-            // send pose
+
             encoder.bReceived = false;
         }
 
 /*
-
         if( encoder.bReceived == true)
         {
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

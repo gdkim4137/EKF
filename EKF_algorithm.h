@@ -8,7 +8,7 @@
 #define A 100           // distance of vehicle along x axis
 #define B 100           // distance of vehicle along y axis
 #define C 1/(A+B)
-#define DIAMETER    150 // diameter of wheel
+#define DIAMETER    160 // diameter of wheel
 
 #define PULSE       4
 #define GEAR_RATIO  20
@@ -37,10 +37,12 @@ class EKF{
 
 public:
     //  x(mm), y(mm), w(rad)
-    QGenericMatrix<2,1,double> state;
+    //QGenericMatrix<2,1,double> state;
+    double state[2];
 
 protected:
-    QGenericMatrix<2,2,double> coordinate_conversion_mat;   //  local to world coordinates for vehicle
+    //QGenericMatrix<2,2,double> coordinate_conversion_mat;   //  local to world coordinates for vehicle
+    double coordinate_conversion_mat[4];
 
     double p[2][2]; //  error co-variance
     double q[2][2]; //  system co-variance
@@ -75,12 +77,20 @@ public:
        k[0][0] = 0; k[0][1] = 0;
        k[1][0] = 0; k[1][1] = 0;
     }
+public:
+    void get_location(int &x, int &y)
+    {
+        x = state[0]*10;  // up to scale 10^-4
+        y = state[1]*10;  // up to scale 10^-4
+    }
 
 public:
     void predict(AngularVelocity prev, AngularVelocity curr, double heading)
     {
+    //    std::cout << "check debug1"<<std::endl;
         //  Local to global coordinate conversion mat, 2X2
-        coordinate_conversion_mat = cacl_rot_mat(heading);
+        cacl_rot_mat(heading);
+
 
         //  calculate linear velocity about each wheel using previous and current absolute encoder value
         LinearVelocity lv = calc_LinearVelocity(prev,curr);
@@ -89,10 +99,12 @@ public:
         double dx = lv.left_top + lv.left_bottom + lv.right_top + lv.right_bottom;
         double dy = -lv.left_top + lv.left_bottom + lv.right_top - lv.right_bottom;
 
+   //     std::cout << "check debug2"<<std::endl;
         //  calculate current location using previous location, moving distance and heading anlge
-        state(0,0) = state(0,0) + coordinate_conversion_mat(0,0)*dx + coordinate_conversion_mat(0,1)*dy + q[0][0];
-        state(1,0) = state(1,0) + coordinate_conversion_mat(1,0)*dx + coordinate_conversion_mat(1,1)*dy + q[1][1];
+        state[0] = state[0] + coordinate_conversion_mat[0]*dx + coordinate_conversion_mat[1]*dy + q[0][0];
+        state[1] = state[1] + coordinate_conversion_mat[2]*dx + coordinate_conversion_mat[3]*dy + q[1][1];
 
+     //   std::cout << "check debug3"<<std::endl;
         //  calculate error co-variance
         p[0][0] += q[0][0];
         p[0][1] += q[0][1]; //  appoximately zero
@@ -109,6 +121,7 @@ public:
 
     void update(int x, int y)
     {
+        /*
         // Uupdate pose of vehicle when UHF Transponder is detected by reader
 
         // location of transponder is restored to rectangular form
@@ -145,22 +158,22 @@ public:
             p[0][0] = p[0][0] - k[0][0]*p[0][0];
             p[1][1] = p[1][1] - k[1][1]*p[1][1];
         }
+        */
 
     }
 
 protected:
-    QGenericMatrix<2,2,double> cacl_rot_mat(double heading)
+    void cacl_rot_mat(double heading)
     {
 
-        //  convert radian to degree
+        //  convert degree to radian
         double rad = qDegreesToRadians(heading);//(2*pi*heading)/360.f;
 
 
-        double mat[] = { qCos(rad), -qSin(rad),
-                         qSin(rad), qCos(rad)};
-
-        QGenericMatrix<2,2,double> result(mat);
-        return result;
+        coordinate_conversion_mat[0] = qCos(rad);
+        coordinate_conversion_mat[1] = -qSin(rad);
+        coordinate_conversion_mat[2] = qSin(rad);
+        coordinate_conversion_mat[3] = qCos(rad);
 
     }
 

@@ -96,6 +96,52 @@ public:
         send_message(command);
     }
 
+    //  this x,y,w
+    void send_pose(int key_pose, int x, int y, int w)
+    {
+        char command[20] = {0};
+        std::string command_string;
+
+        //  head
+        command[0] = 0x55;
+        command[1] = 0x55;
+
+        //  key pose
+        command[2] = (key_pose >> 24) & 0x000000ff;
+        command[3] = (key_pose >> 16) & 0x000000ff;
+        command[4] = (key_pose >> 8) & 0x000000ff;
+        command[5] = (key_pose) & 0x000000ff;
+
+        //  x
+        command[6] = (x >> 24) & 0x000000ff;
+        command[7] = (x >> 16) & 0x000000ff;
+        command[8] = (x >> 8) & 0x000000ff;
+        command[9] = (x) & 0x000000ff;
+
+        //  y
+        command[10] = (y >> 24) & 0x000000ff;
+        command[11] = (y >> 16) & 0x000000ff;
+        command[12] = (y >> 8) & 0x000000ff;
+        command[13] = (y) & 0x000000ff;
+
+        //  w
+        command[14] = (w >> 24) & 0x000000ff;
+        command[15] = (w >> 16) & 0x000000ff;
+        command[16] = (w >> 8) & 0x000000ff;
+        command[17] = (w) & 0x000000ff;
+
+        //  tail
+        command[18] = 0x5a;
+        command[19] = 0x5a;
+
+
+        for (int i = 0 ; i < sizeof(command) ; ++i)
+            command_string += command[i];
+
+        send_pose(command_string);
+
+    }
+
 protected:
     virtual void parser(std::string packet)
     {
@@ -154,10 +200,15 @@ protected:
                 curr.insert(key_pose,left_top,left_bottom,right_top,right_bottom);
                 diff = curr - prev;
 
-                if(diff.left_top > ERR_GAP )      diff.left_top = curr.left_top = prev.left_top;
-                if(diff.right_top > ERR_GAP )     diff.right_top = curr.right_top = prev.right_top;
-                if(diff.left_bottom > ERR_GAP )   diff.left_bottom = curr.left_bottom = prev.left_bottom;
-                if(diff.right_bottom > ERR_GAP )  diff.right_bottom = curr.right_bottom = prev.right_bottom;
+                if(diff.left_top > ERR_GAP )      prev.left_top = curr.left_top;
+
+                if(diff.right_top > ERR_GAP )     prev.right_top = curr.right_top;
+
+                if(diff.left_bottom > ERR_GAP )   prev.left_bottom = curr.left_bottom;
+
+                if(diff.right_bottom > ERR_GAP )  prev.right_bottom = curr.right_bottom;
+
+             //   std::cout << curr.left_top <<"  "<<curr.right_top <<"  " << curr.left_bottom<<"  "<< curr.right_bottom << std::endl;
 
             }
 
@@ -180,3 +231,33 @@ protected:
 };
 
 #endif // ENCODER_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
