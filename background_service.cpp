@@ -63,41 +63,40 @@ void Background_Service::run()
     while(true)
     {
         this->msleep(10);
-     // yr.request_rssi();
+        // yr.request_rssi();
 
 
-        //  send pose to vehicle
-        char command[] = { 0x55, 0x55,
-                           0x51,0x51,0x51,0x51, //  key pose
-                           0x51,0x51,0x51,0x51, //  x location
-                           0x52,0x52,0x52,0x52, //  y location
-                           0x53,0x53,0x53,0x53, //  w (heading angle)
-                           0x54,0x54,0x54,0x54, //  w (heading angle)
-                           0x55, 0x55 };
+      //  std::cout << "while loop"<<std::endl;
 
-
-
-        for (int i = 0 ; i < sizeof(command) ; ++i)
-            command_string += command[i];
-
-        //  append character about new line and to move cursor to front
-        command_string += 0x11;
-        command_string += 0x13;
-
-        encoder.send_pose(command_string);
-        command_string.clear();
-
+//        char command[] = {0x55,0x56,0x57,0x58,0x0A,0x0D};
         if( encoder.bReceived == true)
         {
-            AngularVelocity av;
-            av.left_top = encoder.info.left_top;
-            av.left_bottom = encoder.info.left_bottom;
-            av.right_bottom = encoder.info.right_bottom;
-            av.right_top = encoder.info.right_top;
 
-            emit signal_AngularVelocityReceived(encoder.info.left_top,encoder.info.right_top,
-                                                encoder.info.left_bottom,encoder.info.right_bottom);
+            //  send pose to vehicle
+            char command[] = { 0x55, 0x55,
+                               0x51,0x51,0x51,0x51, //  key pose
+                               0x51,0x51,0x51,0x51, //  x location
+                               0x52,0x52,0x52,0x52, //  y location
+                               0x53,0x53,0x53,0x53, //  w (heading angle)
+                               0xAA, 0xAA};
 
+
+            for (int i = 0 ; i < sizeof(command) ; ++i)
+                command_string += command[i];
+
+            encoder.send_pose(command_string);
+            command_string.clear();
+
+
+
+         //   std::cout << curr.left_top <<" "<< curr.right_top <<" "<< curr.left_bottom <<" "<< curr.right_bottom << std::endl;
+
+            emit signal_AngularVelocityReceived(encoder.curr.left_top,encoder.curr.right_top,
+                                                encoder.curr.left_bottom,encoder.curr.right_bottom);
+//
+            // EKF prediction step run
+
+            // send pose
             encoder.bReceived = false;
         }
 

@@ -173,6 +173,17 @@ protected:
        result.right_bottom  = ((curr.right_bottom-prev.right_bottom)*2*pi / (PULSE*GEAR_RATIO)) * 0.01 * (DIAMETER/2);
        return result;
     }
+
+public:
+    LinearVelocity calc_LinearVelocity(AngularVelocity diff)
+    {
+       LinearVelocity result;
+       result.left_top      = ((diff.left_top)        *2*pi / (PULSE*GEAR_RATIO)) * 0.01 * (DIAMETER/2);
+       result.left_bottom   = ((diff.left_bottom)     *2*pi / (PULSE*GEAR_RATIO)) * 0.01 * (DIAMETER/2);
+       result.right_top     = ((diff.right_top)       *2*pi / (PULSE*GEAR_RATIO)) * 0.01 * (DIAMETER/2);
+       result.right_bottom  = ((diff.right_bottom)    *2*pi / (PULSE*GEAR_RATIO)) * 0.01 * (DIAMETER/2);
+       return result;
+    }
 };
 
 

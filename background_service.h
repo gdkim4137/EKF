@@ -38,6 +38,10 @@ public:
     Encoder encoder;
     EKF kalman;
 
+public:
+    LinearVelocity prev;
+    LinearVelocity curr;
+
 
 public:
     bool device_setup(void);
