@@ -12,6 +12,7 @@ bool Background_Service::device_setup()
 {
     bool check = false;
 
+    /*
     //  UHF RFID, YR9010
     if(yr.start("/dev/ttyUSB0",115200) == false)
     {
@@ -34,13 +35,14 @@ bool Background_Service::device_setup()
 
     this->msleep(1000);
 
+    */
     //  Encoder
-//    if(encoder.start("/dev/ttyAMA0",115200)==false)
- //   {
-  //      std::cout << "Can not access the encoder"<<std::endl;
-   //     emit signal_LogMsgOccured("Can not access the encoder");
-    //    return false;
-  //  }
+    if(encoder.start("/dev/ttyUSB0",115200)==false)
+    {
+        std::cout << "Can not access the encoder"<<std::endl;
+        emit signal_LogMsgOccured("Can not access the encoder");
+        return false;
+    }
 
     return true;
 
@@ -56,29 +58,50 @@ void Background_Service::run()
     emit signal_LogMsgOccured("device setting is complete!");
 
     WithRobot::SensorData sensor_data;
+    std::string command_string;
+
     while(true)
     {
         this->msleep(10);
-        yr.request_rssi();
+     // yr.request_rssi();
 
-        /*
+
         //  send pose to vehicle
+        char command[] = { 0x55, 0x55,
+                           0x51,0x51,0x51,0x51, //  key pose
+                           0x51,0x51,0x51,0x51, //  x location
+                           0x52,0x52,0x52,0x52, //  y location
+                           0x53,0x53,0x53,0x53, //  w (heading angle)
+                           0x54,0x54,0x54,0x54, //  w (heading angle)
+                           0x55, 0x55 };
+
+
+
+        for (int i = 0 ; i < sizeof(command) ; ++i)
+            command_string += command[i];
+
+        //  append character about new line and to move cursor to front
+        command_string += 0x11;
+        command_string += 0x13;
+
+        encoder.send_pose(command_string);
+        command_string.clear();
 
         if( encoder.bReceived == true)
         {
-            char command[] = { 0x55, 0x55,
-                               0x00,0x00,0x00,0x00, //  key pose
-                               0x00,0x00,0x00,0x01, //  x location
-                               0x00,0x00,0x00,0x02, //  y location
-                               0x00,0x00,0x00,0x03, //  w (heading angle)
-                               0x00,0x00,0x00,0x03, //  w (heading angle)
-                               0xAA, 0xAA };
+            AngularVelocity av;
+            av.left_top = encoder.info.left_top;
+            av.left_bottom = encoder.info.left_bottom;
+            av.right_bottom = encoder.info.right_bottom;
+            av.right_top = encoder.info.right_top;
 
-            std::string command_string = command;
-            encoder.send_pose(command_string);
+            emit signal_AngularVelocityReceived(encoder.info.left_top,encoder.info.right_top,
+                                                encoder.info.left_bottom,encoder.info.right_bottom);
+
+            encoder.bReceived = false;
         }
-        */
 
+/*
 
         if( encoder.bReceived == true)
         {
@@ -125,7 +148,7 @@ void Background_Service::run()
             yr.bRecognized = false;
             emit signal_UHFTransponderRecognized(QString::number(yr.info.x),QString::number(yr.info.y));
         }
-
+*/
     }
 }
 

@@ -46,7 +46,7 @@ public:
  //   void callback_yr9010(Transponder& tr);
 
 signals:
-    void signal_AngularVelocityReceived(AngularVelocity);   //  update each of current angular velocity
+    void signal_AngularVelocityReceived(int,int,int,int);   //  update each of current angular velocity
     void signal_HeadingAngleReceived(double);               //  update current heading angle
     void signal_UHFTransponderRecognized(QString,QString);  //  update latest location of transponder recognized
     void signal_LogMsgOccured(QString);                     //  print log message to 'printLog' UI which is textedit ui

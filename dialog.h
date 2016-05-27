@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "background_service.h"
+#include "Encoder.h"
 
 namespace Ui {
 class Dialog;
@@ -24,7 +25,7 @@ protected:
 
 public slots:
 
-    void slot_AngularVelocityReceived(AngularVelocity);  //  update each of current angular velocity
+    void slot_AngularVelocityReceived(int,int,int,int);  //  update each of current angular velocity
     void slot_HeadingAngleReceived(double);              //  update current heading angle
     void slot_UHFTransponderRecognized(QString,QString); //  update latest location of transponder recognized
     void slot_LogMsgOccured(QString);                    //  print log message to 'printLog' UI which is textedit ui

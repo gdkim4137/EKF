@@ -6,6 +6,10 @@
 
 class AngularVelocity
 {
+
+public:
+    int key_pose;
+
 public:
     int left_top;
     int left_bottom;
@@ -50,42 +54,47 @@ protected:
         //	receiving data from motor encoder
         raw_packet += packet;
 
-        std::cout << "parser loop()" <<std::endl;
+        auto pos_encoder = raw_packet.find(header_packet);
+        if(  pos_encoder == std::string::npos)
+            return;
 
-        if( raw_packet.length() > 24)
+        if( raw_packet.length() > pos_encoder + 23 )
         {
-            std::cout << "decoding..." <<std::endl;
-            auto pos_encoder = raw_packet.find(header_packet);
 
             //  decoding
 
-            //  left top wheel encoder
+            //  key pose
+            info.key_pose  = (raw_packet[pos_encoder + 2] << 24) |
+                             (raw_packet[pos_encoder + 3] << 16) |
+                             (raw_packet[pos_encoder + 4] << 8)  |
+                             (raw_packet[pos_encoder + 5]);
 
-            info.left_top  = (raw_packet[pos_encoder + 7] << 24) |
-                             (raw_packet[pos_encoder + 8] << 16) |
-                             (raw_packet[pos_encoder + 9] << 8)  |
-                             (raw_packet[pos_encoder + 10]);
+            //  left top wheel encoder
+            info.left_top  = (raw_packet[pos_encoder + 6] << 24) |
+                             (raw_packet[pos_encoder + 7] << 16) |
+                             (raw_packet[pos_encoder + 8] << 8)  |
+                             (raw_packet[pos_encoder + 9]);
 
             //  right top wheel encoder
-            info.right_top = (raw_packet[pos_encoder + 11] << 24) |
-                             (raw_packet[pos_encoder + 12] << 16) |
-                             (raw_packet[pos_encoder + 13] << 8)  |
-                             (raw_packet[pos_encoder + 14]);
+            info.right_top = (raw_packet[pos_encoder + 10] << 24) |
+                             (raw_packet[pos_encoder + 11] << 16) |
+                             (raw_packet[pos_encoder + 12] << 8)  |
+                             (raw_packet[pos_encoder + 13]);
 
             //  left bottom wheel encoder
-            info.left_bottom  = (raw_packet[pos_encoder + 15] << 24) |
-                                (raw_packet[pos_encoder + 16] << 16) |
-                                (raw_packet[pos_encoder + 17] << 8)  |
-                                (raw_packet[pos_encoder + 18]);
+            info.left_bottom  = (raw_packet[pos_encoder + 14] << 24) |
+                                (raw_packet[pos_encoder + 15] << 16) |
+                                (raw_packet[pos_encoder + 16] << 8)  |
+                                (raw_packet[pos_encoder + 17]);
 
             //  right bottom wheel encoder
-            info.right_bottom = (raw_packet[pos_encoder + 19] << 24) |
-                                (raw_packet[pos_encoder + 20] << 16) |
-                                (raw_packet[pos_encoder + 21] << 8)  |
-                                (raw_packet[pos_encoder + 22]);
+            info.right_bottom = (raw_packet[pos_encoder + 18] << 24) |
+                                (raw_packet[pos_encoder + 19] << 16) |
+                                (raw_packet[pos_encoder + 20] << 8)  |
+                                (raw_packet[pos_encoder + 21]);
 
             //  erase buffer
-            raw_packet.erase(raw_packet.begin(), raw_packet.begin()+pos_encoder+20);
+            raw_packet.erase(raw_packet.begin(), raw_packet.begin()+pos_encoder+24);
 
             QMutex mutex;
             mutex.lock();
